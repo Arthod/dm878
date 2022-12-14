@@ -98,6 +98,15 @@ app.layout = html.Div([
                 barmode="relative")#, color="Collision Type Description"),
         ),
     ]),
+    html.Div(children=[
+        dcc.Graph(#figure=go.FigureWidget([
+            figure=px.scatter_geo(
+                traffic_data, 
+                lat="Latitude", 
+                lon="Longitude", 
+                color="Hit and Run")#, color="Collision Type Description"),
+        ),
+    ]),
 ])
 
 @app.callback(
