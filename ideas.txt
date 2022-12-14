@@ -1,0 +1,5 @@
+https://data.world/hhaveliw/world-university-ranking-2016
+https://data.world/data-society/nyc-leading-causes-of-death/workspace/file?filename=New_York_City_Leading_Causes_of_Death.csv
+https://data.world/bolekro/battles-of-hundred-years-war/workspace/file?filename=hundred+geolocated.csv
+https://data.world/kieroneil/us-civil-war-1861-1865/workspace/file?filename=bodart1908_forces.csv
+https://data.world/government/coups-1945-2019/workspace/file?filename=Coup_Data_v2.0.0.csv
