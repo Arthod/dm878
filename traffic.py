@@ -38,7 +38,14 @@ traffic_data = pd.read_csv("traffic_accidents_2018_pp.csv", encoding='utf-8')
 traffic_data.head()
 
 #grouped_traffic_data = pd.DataFrame(traffic_data.groupby(by=['Hit and Run', "Collision Type Description"])["Number of Injuries"].sum())
-grouped_traffic_data = pd.DataFrame(traffic_data.groupby(by=['Hit and Run', "Collision Type Description"]).agg({
+grouped_traffic_data3 = pd.DataFrame(traffic_data.groupby(by=['Hit and Run', "Collision Type Description", "Weather Description", "Illumination Description"]).agg({
+    "Hit and Run": "first",
+    "Collision Type Description": "first",
+    "Number of Injuries": "sum",
+    "Weather Description": "first",
+    "Illumination Description": "first",
+}))
+grouped_traffic_data1 = pd.DataFrame(traffic_data.groupby(by=['Hit and Run', "Collision Type Description"]).agg({
     "Hit and Run": "first",
     "Collision Type Description": "first",
     "Number of Injuries": "sum",
@@ -81,11 +88,11 @@ app.layout = html.Div([
     html.Div(children=[
         dcc.Graph(#figure=go.FigureWidget([
             figure=px.bar(
-                grouped_traffic_data, 
+                grouped_traffic_data1, 
                 x="Collision Type Description", 
-                y="Number of Injuries", 
+                y="Number of Injuries",
                 color="Hit and Run", 
-                barmode="relative")#, color="Collision Type Description"),
+                )#, color="Collision Type Description"),
         ),
     ]),
     html.Div(children=[
@@ -96,6 +103,16 @@ app.layout = html.Div([
                 y="Number of Injuries", 
                 color="Hit and Run", 
                 barmode="relative")#, color="Collision Type Description"),
+        ),
+    ]),
+    html.Div(children=[
+        dcc.Graph(#figure=go.FigureWidget([
+            figure=px.sunburst(
+                grouped_traffic_data3, 
+                path=['Illumination Description', "Weather Description", "Hit and Run"],
+                values="Number of Injuries", 
+                color="Hit and Run", 
+                )#, color="Collision Type Description"),
         ),
     ]),
     html.Div(children=[
