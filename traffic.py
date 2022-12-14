@@ -55,6 +55,11 @@ grouped_traffic_data2 = pd.DataFrame(traffic_data.groupby(by=['Hit and Run', "Il
     "Illumination Description": "first",
     "Number of Injuries": "sum",
 }))
+grouped_traffic_data4 = pd.DataFrame(traffic_data.groupby(by=['Hit and Run', "Weather Description"]).agg({
+    "Hit and Run": "first",
+    "Weather Description": "first",
+    "Number of Injuries": "sum",
+}))
 
 # traffic_data
 
@@ -85,26 +90,42 @@ app.layout = html.Div([
         dcc.Graph(id="graphInjuriesByTime"),  # Injuries by time
         dcc.Dropdown(["Hour", "Week", "Month", "Year"], "Hour", id="picked_time")
     ]),
-    html.Div(children=[
-        dcc.Graph(#figure=go.FigureWidget([
-            figure=px.bar(
-                grouped_traffic_data1, 
-                x="Collision Type Description", 
-                y="Number of Injuries",
-                color="Hit and Run", 
-                )#, color="Collision Type Description"),
-        ),
-    ]),
-    html.Div(children=[
-        dcc.Graph(#figure=go.FigureWidget([
-            figure=px.bar(
-                grouped_traffic_data2, 
-                x="Illumination Description", 
-                y="Number of Injuries", 
-                color="Hit and Run", 
-                barmode="relative")#, color="Collision Type Description"),
-        ),
-    ]),
+
+    
+    html.Div([
+        html.Div(children=[
+            dcc.Graph(#figure=go.FigureWidget([
+                figure=px.bar(
+                    grouped_traffic_data1, 
+                    x="Collision Type Description", 
+                    y="Number of Injuries",
+                    color="Hit and Run", 
+                    )#, color="Collision Type Description"),
+            ),
+        ], className="four columns"),
+        html.Div(children=[
+            dcc.Graph(#figure=go.FigureWidget([
+                figure=px.bar(
+                    grouped_traffic_data2, 
+                    x="Illumination Description", 
+                    y="Number of Injuries", 
+                    color="Hit and Run", 
+                    barmode="relative")#, color="Collision Type Description"),
+            ),
+        ], className="four columns"),
+        html.Div(children=[
+            dcc.Graph(#figure=go.FigureWidget([
+                figure=px.bar(
+                    grouped_traffic_data4, 
+                    x="Weather Description", 
+                    y="Number of Injuries", 
+                    color="Hit and Run", 
+                    barmode="relative")#, color="Collision Type Description"),
+            ),
+        ], className="four columns"),
+    ], className="row"),
+
+
     html.Div(children=[
         dcc.Graph(#figure=go.FigureWidget([
             figure=px.sunburst(
