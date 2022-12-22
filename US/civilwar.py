@@ -33,6 +33,7 @@ if (not os.path.exists("dataset/cwsac_battles_pp.csv")):
 
 cwsac_battles = pd.read_csv("dataset/cwsac_battles_pp.csv", encoding='utf-8')
 cwsac_commanders = pd.read_csv("dataset/cwsac_commanders.csv", encoding='utf-8')
+cwsac_campaigns = pd.read_csv("dataset/cwsac_campaigns.csv", encoding='utf-8')
 
 cwsac_battles["strength"] = cwsac_battles["strength"].fillna(0)
 cwsac_battles["casualties"] = cwsac_battles["casualties"].fillna(0)
@@ -94,11 +95,11 @@ app.layout = html.Div([
                 html.Div([
                     # Bloodiest Campaigns
                     dcc.Graph(id="battleCasualtiesByDate")
-                ], style={'width': '33%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
+                ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
                 html.Div([   
                     dcc.Graph(id="campaignCasualtiesByDate")
 
-                ], style={'width': '66%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
+                ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
             ]),
         ]),
     ]),
@@ -186,13 +187,13 @@ def update_map(time, downdown_type, current_dropdown_campaigns, current_dropdown
         mapbox_style="carto-positron",
         height=600,
         hover_name="battle_name",
-        symbol="campaign",
         
         #size="strength",
         size_max=15,
         hover_data=["start_date", "end_date", "strength", "casualties", "theater"],
         zoom=3,
-        title="Battle Locations")
+        title="Battle Locations"
+        )
 
 
     fig2 = px.scatter(
@@ -201,13 +202,23 @@ def update_map(time, downdown_type, current_dropdown_campaigns, current_dropdown
         y="casualties",
         color=downdown_type,
         title="Casualties by date (Theater/Result)",
+        hover_name="battle_name",
+        hover_data=[],
+        marginal_x="histogram",
+        marginal_y="rug"
         )
-    fig3 = px.scatter(
-        mydata,
-        x="start_date",
-        y="casualties",
-        color="campaign"
+
+    print(mydata["battle_name"])
+    
+    dfg = mydata.groupby(["start_date", "battle_name", "strength", "casualties"]).size().to_frame().sort_values(["strength", "casualties"], ascending = False).head(10).reset_index()
+    fig3 = px.bar(
+        dfg,
+        x="battle_name",
+        y=["strength", "casualties"],
+        title="Top 10 Battles in terms of Strength and Casualties",
         )
+
+        
     fig4 = px.scatter(
         mydata,
         x="start_date",
