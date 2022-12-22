@@ -22,6 +22,7 @@ from civilwar_preprocessing import preprocess
 # https://data.world/kieroneil/us-civil-war-1861-1865/workspace/file?filename=cwsac_battles.csv
 
 
+time_old = [0, 0]
 f_json = open("us-states-geojson.json")
 usa_geojson = json.load(f_json)
 f_json.close()
@@ -72,6 +73,7 @@ app.layout = html.Div([
                     ),
                 ], style={'width': '76%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '1%'}),
                 html.Div([
+                    dcc.Graph(id="table"),
                     
                 ], style={'width': '10%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '1%'})
             ]),
@@ -84,16 +86,13 @@ app.layout = html.Div([
 @app.callback(
     Output(component_id='geomap', component_property='figure'),
     [Input(component_id='time-slider', component_property='value'),
-    Input(component_id='dropdownPickType', component_property='value')]
+    Input(component_id='dropdownPickType', component_property='value'),
+    #Input('geomap', 'clickData')
+    ]
 )
 def update_output(time, downdown_type):
+
     mydata = cwsac_battles.copy(deep=True)
-
-    fig = px.choropleth_mapbox(mydata, geojson=usa_geojson, color="result",
-                           locations="state",
-                           center={"lat": 45.5517, "lon": -73.7073},
-                           mapbox_style="carto-positron", zoom=9)
-
     
     if time != [mintime, maxtime]:
         formatted_time_min_year = int(time[0])
@@ -113,10 +112,11 @@ def update_output(time, downdown_type):
         mydata = mydata[(mydata['start_date'] > start_date) & (mydata['start_date'] < end_date)]
         print(len(mydata))
 
-    fig.add_trace(px.scatter(
+
+    fig = px.scatter_mapbox(
         mydata,
-        x="lat",
-        y="long",
+        lat="lat",
+        lon="long",
         color=downdown_type,
         mapbox_style="carto-positron",
         height=600,
@@ -124,13 +124,21 @@ def update_output(time, downdown_type):
         
         #size="strength",
         size_max=15,
-        hover_data=["start_date", "strength", "casualties"], 
+        hover_data=["start_date", "end_date", "strength", "casualties"],
         zoom=3,
-        title="Battle Locations"))
-    
-        
-    return fig
+        title="Battle Locations")
 
+    """fig.update_layout(
+        mapbox = {
+            'style': "white-bg",
+            'center': {'lon': -86, 'lat': 35},
+            'zoom': 3, 'layers': [{
+                'source': usa_geojson,
+                'type':'fill', 'below':'traces','color': 'grey', 'opacity' : 0.2}],
+        },
+        margin = {'l':0, 'r':0, 'b':0, 't':0})"""
+
+    return fig
 
 if __name__ == "__main__":  
     app.run_server(debug=True, port=8080)  # Turn off reloader if inside Jupyter
