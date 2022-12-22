@@ -11,8 +11,15 @@ import dash
 from dash import dcc
 from dash import html
 
+from traffic_preprocessing import preprocess
+import os
+
 def rgb_to_hex(r, g, b):
     return '#%02x%02x%02x' % (r, g, b)
+
+if (not os.path.exists("traffic_accidents_2018_pp.csv")):
+    preprocess()
+
 
 WEEKDAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
 
