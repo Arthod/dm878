@@ -93,12 +93,12 @@ app.layout = html.Div([
         html.Div(className='row', children=[
             html.Div([
                 html.Div([
-                    # Bloodiest Campaigns
+                    # Bloodiest Battles
                     dcc.Graph(id="battleCasualtiesByDate")
                 ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
                 html.Div([   
-                    dcc.Graph(id="campaignCasualtiesByDate")
 
+                    dcc.Graph(id="campaignCasualtiesByDate")
                 ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
             ]),
         ]),
@@ -210,12 +210,14 @@ def update_map(time, downdown_type, current_dropdown_campaigns, current_dropdown
 
     print(mydata["battle_name"])
     
-    dfg = mydata.groupby(["start_date", "battle_name", "strength", "casualties"]).size().to_frame().sort_values(["strength", "casualties"], ascending = False).head(10).reset_index()
+    dfg = mydata.groupby(["start_date", "battle_name", "strength", "casualties"]).size().to_frame().sort_values(["strength", "casualties"], ascending=False).head(10).reset_index()
     fig3 = px.bar(
         dfg,
         x="battle_name",
         y=["strength", "casualties"],
         title="Top 10 Battles in terms of Strength and Casualties",
+        barmode="overlay",
+        opacity=1
         )
 
         
