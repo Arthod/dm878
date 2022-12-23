@@ -98,7 +98,18 @@ app.layout = html.Div([
                 ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
                 html.Div([   
 
-                    dcc.Graph(id="campaignCasualtiesByDate")
+                    dcc.Graph(id="Top10Battles")
+                ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
+            ]),
+        ]),
+        html.Div(className='row', children=[
+            html.Div([
+                html.Div([
+                    # Bloodiest Battles
+                    dcc.Graph(id="Top10ConfCommandersByVictoryCount")
+                ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
+                html.Div([
+                    dcc.Graph(id="Top10UnionCommandersByVictoryCount")
                 ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top', 'margin': '0%'}),
             ]),
         ]),
@@ -113,7 +124,9 @@ app.layout = html.Div([
     [
         Output(component_id='geomap', component_property='figure'),
         Output(component_id='battleCasualtiesByDate', component_property='figure'),
-        Output(component_id='campaignCasualtiesByDate', component_property='figure'),
+        Output(component_id='Top10Battles', component_property='figure'),
+        Output(component_id='Top10ConfCommandersByVictoryCount', component_property='figure'),
+        Output(component_id='Top10UnionCommandersByVictoryCount', component_property='figure'),
     ],
     [
         Input(component_id='time-slider', component_property='value'),
@@ -192,8 +205,7 @@ def update_map(time, downdown_type, current_dropdown_campaigns, current_dropdown
         size_max=15,
         hover_data=["start_date", "end_date", "strength", "casualties", "theater"],
         zoom=3,
-        title="Battle Locations"
-        )
+        title="Battle Locations",)
 
 
     fig2 = px.scatter(
@@ -205,8 +217,12 @@ def update_map(time, downdown_type, current_dropdown_campaigns, current_dropdown
         hover_name="battle_name",
         hover_data=[],
         marginal_x="histogram",
-        marginal_y="rug"
-        )
+        marginal_y="rug",
+        color_discrete_map={
+            "Union": "blue",
+            "Confederate": "red",
+            "Inconclusive": "orange"
+        })
 
     print(mydata["battle_name"])
     
@@ -217,21 +233,81 @@ def update_map(time, downdown_type, current_dropdown_campaigns, current_dropdown
         y=["strength", "casualties"],
         title="Top 10 Battles in terms of Strength and Casualties",
         barmode="overlay",
-        opacity=1
-        )
+        opacity=1)
 
+    conf_commanders_results = {}
+    union_commanders_results = {}
+    for idx, row in mydata.iterrows():
         
-    fig4 = px.scatter(
-        mydata,
-        x="start_date",
-        y="strength",
-        color="result"
-        )
+        for i in range(1, 5):
+            union_commander = row[f"union_commander{i}"]
+            conf_commander = row[f"conf_commander{i}"]
 
-    return fig1, fig2, fig3
+            if (conf_commander not in conf_commanders_results):
+                conf_commanders_results[conf_commander] = [0, 0, 0, 0]
+            if (union_commander not in union_commanders_results):
+                union_commanders_results[union_commander] = [0, 0, 0, 0]
+            conf_commanders_results[conf_commander][0] += 1
+            union_commanders_results[union_commander][0] += 1
+
+            if (row["result"] == "Union"):
+                conf_commanders_results[conf_commander][2] += 1
+                union_commanders_results[union_commander][1] += 1
+            elif (row["result"] == "Confederate"):
+                conf_commanders_results[conf_commander][1] += 1
+                union_commanders_results[union_commander][2] += 1
+            elif (row["result"] == "Inconclusive"):
+                conf_commanders_results[conf_commander][3] += 1
+                union_commanders_results[union_commander][3] += 1
+
+    vs = conf_commanders_results.values()
+    conf_df = pd.DataFrame(
+        zip(
+            conf_commanders_results.keys(),
+            [v[0] for v in vs],
+            [v[1] for v in vs],
+            [v[2] for v in vs],
+            [v[3] for v in vs],
+        ),
+        columns=["commander_name", "battles", "victories", "inconclusive", "defeats"]
+    ).groupby(["commander_name", "battles", "victories", "inconclusive", "defeats"]).size().to_frame().sort_values(["battles", "victories", "defeats"], ascending=False).head(20).reset_index()
+    fig4 = px.bar(
+        conf_df,
+        x="commander_name",
+        y=["defeats", "inconclusive", "victories"],
+        color_discrete_map={
+            "defeats": "red",
+            "victories": "green",
+            "inconclusive": "orange",
+        },
+        title="Top 20 Confederate Commanders")
+
+    vs = union_commanders_results.values()
+    union_df = pd.DataFrame(
+        zip(
+            union_commanders_results.keys(),
+            [v[0] for v in vs],
+            [v[1] for v in vs],
+            [v[2] for v in vs],
+            [v[3] for v in vs],
+        ),
+        columns=["commander_name", "battles", "victories", "inconclusive", "defeats"]
+    ).groupby(["commander_name", "battles", "victories", "inconclusive", "defeats"]).size().to_frame().sort_values(["battles", "victories", "defeats"], ascending=False).head(20).reset_index()
+    fig5 = px.bar(
+        union_df,
+        x="commander_name",
+        y=["defeats", "inconclusive", "victories"],
+        color_discrete_map={
+            "defeats": "red",
+            "victories": "green",
+            "inconclusive": "orange",
+        },
+        title="Top 20 Union Commanders")
+
+    return fig1, fig2, fig3, fig4, fig5
 
 
 
 
 if __name__ == "__main__":  
-    app.run_server(debug=True, port=8080)  # Turn off reloader if inside Jupyter
+    app.run_server(debug=False, port=8080)  # Turn off reloader if inside Jupyter
