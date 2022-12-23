@@ -14,8 +14,6 @@ from dash import dcc
 import dash_daq as daq
 from dash import html
 
-import utils
-
 import os
 
 from civilwar_preprocessing import preprocess
