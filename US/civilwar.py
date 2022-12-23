@@ -22,9 +22,7 @@ from civilwar_preprocessing import preprocess
 
 
 time_old = [0, 0]
-f_json = open("us-states-geojson.json")
-usa_geojson = json.load(f_json)
-f_json.close()
+
 
 if (not os.path.exists("dataset/cwsac_battles_pp.csv")):
     preprocess()
